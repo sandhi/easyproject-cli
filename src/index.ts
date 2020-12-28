@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var inquirer = require("inquirer");
+var chalk = require("chalk");
 
 inquirer
     .prompt([
@@ -11,4 +12,4 @@ inquirer
             choices: ["ionic 4", "ionic 5", "loopback 4"],
         },
     ])
-    .then((res: any) => console.log("project yang akan anda buat adalah " + res.project));
+    .then((res: any) => console.log("project yang akan anda buat adalah " + chalk.blue(res.project)));
