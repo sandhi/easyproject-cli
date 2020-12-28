@@ -4,7 +4,7 @@
   "description": "create a project with easy",
   "main": "index.js",
   "bin": {
-     "ep":"./index.js"
+    "ep": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
