@@ -2,7 +2,10 @@
 
 var inquirer = require("inquirer");
 var chalk = require("chalk");
+import { program } from "commander";
 
+program.version("1.0.0", "-v, --version", "show cli version");
+program.parse(process.argv);
 inquirer
     .prompt([
         {
