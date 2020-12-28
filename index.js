@@ -1,3 +1,14 @@
 #!/usr/bin/env node
 
-console.log("Welcome to easyproject");
+import { prompt } from "inquirer";
+
+prompt(
+		[
+			{
+				type: 'list', 
+				name:'project', 
+				message: 'project apa yang ingin ada buat ?', 
+				choices:['ionic 4','ionic 5','loopback 4']
+			}
+		])
+	.then(res => console.log("project yang akan anda buat adalah " + res.project));
