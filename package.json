@@ -15,5 +15,8 @@
     "npm"
   ],
   "author": "sandhi.yz@gmail.com",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "^7.3.3"
+  }
 }
