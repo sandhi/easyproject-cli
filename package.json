@@ -1,0 +1,19 @@
+{
+  "name": "easyproject",
+  "version": "1.0.0",
+  "description": "create a project with easy",
+  "main": "index.js",
+  "bin": {
+     "ep":"./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "easyproject",
+    "node",
+    "npm"
+  ],
+  "author": "sandhi.yz@gmail.com",
+  "license": "ISC"
+}
