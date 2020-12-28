@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { prompt } from "inquirer";
+var inquirer = require("inquirer");
 
-prompt(
+inquirer.prompt(
 		[
 			{
 				type: 'list', 
