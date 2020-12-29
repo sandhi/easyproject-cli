@@ -5,7 +5,7 @@ var inquirer = require("inquirer");
 import chalk from "chalk";
 import { program } from "commander";
 
-import * as reactapp from "reactapp_module";
+import * as reactapp from "./reactapp_module";
 
 type PACKAGE_TYPE = "ionic3" | "ionic4" | "loopback4" | "reactapp";
 
