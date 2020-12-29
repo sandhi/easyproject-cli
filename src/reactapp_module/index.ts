@@ -1,11 +1,6 @@
 import inquirer from "inquirer";
-import commander from "commander";
-import { stdout } from "process";
-import chalk, { stderr } from "chalk";
+import chalk from "chalk";
 import { exec, spawn } from "child_process";
-import { SSL_OP_NO_QUERY_MTU } from "constants";
-
-var ncmd = require("node-cmd");
 
 type dep = "react-router-dom" | "bootstrap@4.5.3" | "axios";
 
@@ -70,7 +65,7 @@ export function create_reactapp() {
 }
 
 function do_create_react_app(name: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const create_app = spawn("npx", ["create-react-app", name], {
             cwd: process.cwd(),
             detached: true,
@@ -92,7 +87,7 @@ function do_install_dep(dep: dep[]) {
         list_dep.push(val);
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         if (dep.length > 0) {
             const install_dep = spawn("npm", list_dep, {
                 cwd: process.cwd(),
