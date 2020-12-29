@@ -7,7 +7,6 @@ exports.create_reactapp = void 0;
 const inquirer_1 = __importDefault(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const child_process_1 = require("child_process");
-var ncmd = require("node-cmd");
 const prompt_name = {
     react_app_name: "react_app_name",
     react_app_dependency: "react_app_dependency",
@@ -46,22 +45,17 @@ function create_reactapp() {
             console.log("==================================================");
             console.log(chalk_1.default.blue("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
             await do_create_react_app(res.react_app_name);
-            child_process_1.exec("cd " + res.react_app_name, () => {
-                console.log("\n");
-                console.log("masuk ke directory " + res.react_app_name);
-                console.log("\n");
-            });
         }
         if (res.react_app_dependency) {
             console.log("==================================================");
             console.log(chalk_1.default.blue("menginstall dependecy : ", res.react_app_dependency.join(" ")));
-            await do_install_dep(res.react_app_dependency);
+            await do_install_dep(res);
         }
     });
 }
 exports.create_reactapp = create_reactapp;
 function do_create_react_app(name) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const create_app = child_process_1.spawn("npx", ["create-react-app", name], {
             cwd: process.cwd(),
             detached: true,
@@ -72,17 +66,16 @@ function do_create_react_app(name) {
         });
     });
 }
-function do_install_dep(dep) {
+function do_install_dep(data) {
     let list_dep = [];
     list_dep.push("install");
-    dep.map((val) => {
+    data.react_app_dependency.map((val) => {
         list_dep.push(val);
     });
-    console.log(chalk_1.default.cyanBright("package yang akan di install : ", list_dep));
-    return new Promise((resolve, reject) => {
-        if (dep.length > 0) {
+    return new Promise((resolve) => {
+        if (data.react_app_dependency.length > 0) {
             const install_dep = child_process_1.spawn("npm", list_dep, {
-                cwd: process.cwd(),
+                cwd: process.cwd() + "/" + data.react_app_name,
                 detached: true,
                 stdio: "inherit",
             });

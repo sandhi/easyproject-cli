@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
-import { exec, spawn } from "child_process";
+import { exec, execSync, spawn } from "child_process";
 
 type dep = "react-router-dom" | "bootstrap@4.5.3" | "axios";
 
@@ -52,14 +52,8 @@ export function create_reactapp() {
             if (res.react_app_dependency) {
                 console.log("==================================================");
 
-                exec("cd " + res.react_app_name, () => {
-                    console.log("\n");
-                    console.log("masuk ke directory " + res.react_app_name);
-                    console.log("\n");
-                });
-
                 console.log(chalk.blue("menginstall dependecy : ", res.react_app_dependency.join(" ")));
-                await do_install_dep(res.react_app_dependency);
+                await do_install_dep(res);
             }
         });
 }
@@ -78,19 +72,19 @@ function do_create_react_app(name: string) {
     });
 }
 
-function do_install_dep(dep: dep[]) {
+function do_install_dep(data: IPromptValue) {
     let list_dep: any[] = [];
 
     list_dep.push("install");
 
-    dep.map((val) => {
+    data.react_app_dependency.map((val) => {
         list_dep.push(val);
     });
 
     return new Promise((resolve) => {
-        if (dep.length > 0) {
+        if (data.react_app_dependency.length > 0) {
             const install_dep = spawn("npm", list_dep, {
-                cwd: process.cwd(),
+                cwd: process.cwd() + "/" + data.react_app_name,
                 detached: true,
                 stdio: "inherit",
             });
