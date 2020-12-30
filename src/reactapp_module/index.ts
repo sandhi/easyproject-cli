@@ -4,7 +4,7 @@ import execa from "execa";
 const Listr = require("listr");
 
 type dep = "react-router-dom" | "bootstrap@4.5.3" | "axios" | "node-sass";
-type template = "typescript";
+type template = "default" | "typescript";
 
 const prompt_name = {
     react_app_name: "react_app_name",
@@ -19,7 +19,7 @@ interface IPromptValue {
 }
 
 const list_dependency: dep[] = ["react-router-dom", "bootstrap@4.5.3", "axios", "node-sass"];
-const list_template: template[] = ["typescript"];
+const list_template: template[] = ["default", "typescript"];
 
 export function create_reactapp() {
     inquirer
@@ -49,7 +49,7 @@ export function create_reactapp() {
             {
                 type: "list",
                 name: prompt_name.react_app_template,
-                message: "template apa yang anda inginkan (enter untuk tidak menggunakan)",
+                message: "template apa yang anda inginkan",
                 choices: list_template,
             },
         ])
@@ -75,7 +75,7 @@ async function do_create_react_app(data: IPromptValue) {
     arg_list.push("create-react-app");
     arg_list.push(data.react_app_name);
 
-    if (data.react_app_template != undefined) {
+    if (data.react_app_template != undefined && data.react_app_template != "default") {
         arg_list.push("--template");
         arg_list.push(data.react_app_template);
     }
@@ -83,9 +83,9 @@ async function do_create_react_app(data: IPromptValue) {
     let tasks = new Listr([
         {
             title:
-                "installing react app" + (data.react_app_template != undefined)
-                    ? " dengan template " + chalk.blueBright(data.react_app_template)
-                    : "",
+                data.react_app_template != undefined
+                    ? "installing react app dengan template " + chalk.blueBright(data.react_app_template)
+                    : "installing react app",
             task: () => {
                 return execa("npx", arg_list);
             },
@@ -98,7 +98,14 @@ async function do_create_react_app(data: IPromptValue) {
 async function do_install_dep(data: IPromptValue) {
     let proc: any = [];
 
-    data.react_app_dependency.map((value) => {
+    let list_dep: any[] = data.react_app_dependency;
+
+    if (data.react_app_dependency.includes("bootstrap@4.5.3")) {
+        list_dep.push("jquery");
+        list_dep.push("popper.js");
+    }
+
+    list_dep.map((value) => {
         proc.push({
             title: "installing " + value,
             task: (ctx: any, task: any) => {
