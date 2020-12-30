@@ -8,6 +8,7 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const execa_1 = __importDefault(require("execa"));
 const Listr = require("listr");
+const cli_table_1 = __importDefault(require("cli-table"));
 const prompt_name = {
     react_app_name: "react_app_name",
     react_app_template: "react_app_template",
@@ -29,6 +30,9 @@ function create_reactapp() {
                     }
                     else if (input.indexOf(" ") !== -1) {
                         reject("tidak boleah ada spasi");
+                    }
+                    else if (input.length > 30) {
+                        reject("nama terlalu panjang");
                     }
                     else {
                         resolve(input);
@@ -60,6 +64,7 @@ function create_reactapp() {
             console.log(chalk_1.default.blueBright("menginstall dependecy : ", res.react_app_dependency.join(" ")));
             await do_install_dep(res);
         }
+        await do_finish_message(res);
     });
 }
 exports.create_reactapp = create_reactapp;
@@ -73,7 +78,7 @@ async function do_create_react_app(data) {
     }
     let tasks = new Listr([
         {
-            title: data.react_app_template != undefined
+            title: data.react_app_template != undefined && data.react_app_template != "default"
                 ? "installing react app dengan template " + chalk_1.default.blueBright(data.react_app_template)
                 : "installing react app",
             task: () => {
@@ -95,7 +100,7 @@ async function do_install_dep(data) {
             title: "installing " + value,
             task: (ctx, task) => {
                 return execa_1.default("npm", ["install", "--save", value], {
-                    cwd: process.cwd() + "/" + data.react_app_name,
+                    cwd: process.cwd() + "\\" + data.react_app_name,
                 }).catch((err) => {
                     console.log(chalk_1.default.red(err));
                     task.skip("failed install " + value);
@@ -105,4 +110,23 @@ async function do_install_dep(data) {
     });
     let tasks = new Listr(proc);
     await tasks.run();
+}
+async function do_finish_message(data) {
+    console.log(chalk_1.default.greenBright("berhasil membuat app pada directory : " + process.cwd() + "\\" + data.react_app_name));
+    console.log(chalk_1.default.greenBright("untuk memulai silahkan masuk ke dalam directory tersebut dan jalankan perintah " +
+        chalk_1.default.blueBright("npm start")));
+    const table_options = {
+        head: [
+            chalk_1.default.blueBright("Nama App"),
+            chalk_1.default.blueBright("Directory"),
+            chalk_1.default.blueBright("Installed Dependency"),
+            chalk_1.default.blueBright("Template"),
+        ],
+    };
+    const table = new cli_table_1.default(table_options);
+    let dep = data.react_app_dependency.length > 3
+        ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
+        : data.react_app_dependency;
+    table.push([data.react_app_name, process.cwd() + "\\" + data.react_app_name, dep, data.react_app_template]);
+    console.log(table.toString());
 }
