@@ -3,6 +3,7 @@ import chalk from "chalk";
 import execa from "execa";
 const Listr = require("listr");
 import Table from "cli-table";
+import { Observable } from "rxjs";
 
 type dep = "react-router-dom" | "bootstrap@4.5.3" | "axios" | "node-sass";
 type template = "default" | "typescript";
@@ -57,20 +58,26 @@ export function create_reactapp() {
             },
         ])
         .then(async (res: IPromptValue) => {
-            if (res.react_app_name) {
-                console.log("==================================================");
-                console.log(chalk.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
-                await do_create_react_app(res);
+            try {
+                if (res.react_app_name) {
+                    console.log("==================================================");
+                    console.log(
+                        chalk.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n")
+                    );
+                    await do_create_react_app(res);
+                }
+
+                if (res.react_app_dependency) {
+                    console.log("==================================================");
+
+                    console.log(chalk.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
+                    await do_install_dep(res);
+                }
+
+                await do_finish_message(res);
+            } catch (e) {
+                console.log(chalk.red("Process gagal, silahkan coba lagi"));
             }
-
-            if (res.react_app_dependency) {
-                console.log("==================================================");
-
-                console.log(chalk.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
-                await do_install_dep(res);
-            }
-
-            await do_finish_message(res);
         });
 }
 
@@ -92,7 +99,23 @@ async function do_create_react_app(data: IPromptValue) {
                     ? "installing react app dengan template " + chalk.blueBright(data.react_app_template)
                     : "installing react app",
             task: () => {
-                return execa("npx", arg_list);
+                // return execa("npx", arg_list);
+
+                return new Observable((observable) => {
+                    try {
+                        let proc = execa("npx", arg_list);
+
+                        proc.stdout?.on("data", (data) => {
+                            observable.next(data.toString());
+                        });
+
+                        proc.on("exit", () => {
+                            observable.complete();
+                        });
+                    } catch (e) {
+                        observable.error("error create app");
+                    }
+                });
             },
         },
     ]);
@@ -143,15 +166,6 @@ async function do_finish_message(data: IPromptValue) {
         data.react_app_dependency.length > 3
             ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
             : data.react_app_dependency;
-
-    const table_options = {
-        head: [
-            chalk.blueBright("Nama App"),
-            chalk.blueBright("Directory"),
-            chalk.blueBright("Installed Dependency"),
-            chalk.blueBright("Template"),
-        ],
-    };
 
     const table = new Table();
 

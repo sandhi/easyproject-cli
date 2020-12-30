@@ -9,6 +9,7 @@ const chalk_1 = __importDefault(require("chalk"));
 const execa_1 = __importDefault(require("execa"));
 const Listr = require("listr");
 const cli_table_1 = __importDefault(require("cli-table"));
+const rxjs_1 = require("rxjs");
 const prompt_name = {
     react_app_name: "react_app_name",
     react_app_template: "react_app_template",
@@ -54,17 +55,22 @@ function create_reactapp() {
         },
     ])
         .then(async (res) => {
-        if (res.react_app_name) {
-            console.log("==================================================");
-            console.log(chalk_1.default.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
-            await do_create_react_app(res);
+        try {
+            if (res.react_app_name) {
+                console.log("==================================================");
+                console.log(chalk_1.default.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
+                await do_create_react_app(res);
+            }
+            if (res.react_app_dependency) {
+                console.log("==================================================");
+                console.log(chalk_1.default.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
+                await do_install_dep(res);
+            }
+            await do_finish_message(res);
         }
-        if (res.react_app_dependency) {
-            console.log("==================================================");
-            console.log(chalk_1.default.blueBright("menginstall dependecy : ", res.react_app_dependency.join(" ")));
-            await do_install_dep(res);
+        catch (e) {
+            console.log(chalk_1.default.red("Process gagal, silahkan coba lagi"));
         }
-        await do_finish_message(res);
     });
 }
 exports.create_reactapp = create_reactapp;
@@ -82,7 +88,22 @@ async function do_create_react_app(data) {
                 ? "installing react app dengan template " + chalk_1.default.blueBright(data.react_app_template)
                 : "installing react app",
             task: () => {
-                return execa_1.default("npx", arg_list);
+                // return execa("npx", arg_list);
+                return new rxjs_1.Observable((observable) => {
+                    var _a;
+                    try {
+                        let proc = execa_1.default("npx", arg_list);
+                        (_a = proc.stdout) === null || _a === void 0 ? void 0 : _a.on("data", (data) => {
+                            observable.next(data.toString());
+                        });
+                        proc.on("exit", () => {
+                            observable.complete();
+                        });
+                    }
+                    catch (e) {
+                        observable.error("error create app");
+                    }
+                });
             },
         },
     ]);
@@ -127,6 +148,6 @@ async function do_finish_message(data) {
         ],
     };
     const table = new cli_table_1.default();
-    table.push({ "Nama App": data.react_app_name }, { Directory: process.cwd() + "\\" + data.react_app_name }, { "Installed dependecy": dep }, { Template: data.react_app_template });
+    table.push({ "Nama App": data.react_app_name }, { Directory: process.cwd() + "\\" + data.react_app_name }, { "Installed dependency": dep }, { Template: data.react_app_template });
     console.log(table.toString());
 }
