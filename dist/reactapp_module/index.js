@@ -115,6 +115,9 @@ async function do_finish_message(data) {
     console.log(chalk_1.default.greenBright("berhasil membuat app pada directory : " + process.cwd() + "\\" + data.react_app_name));
     console.log(chalk_1.default.greenBright("untuk memulai silahkan masuk ke dalam directory tersebut dan jalankan perintah " +
         chalk_1.default.blueBright("npm start")));
+    let dep = data.react_app_dependency.length > 3
+        ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
+        : data.react_app_dependency;
     const table_options = {
         head: [
             chalk_1.default.blueBright("Nama App"),
@@ -123,10 +126,7 @@ async function do_finish_message(data) {
             chalk_1.default.blueBright("Template"),
         ],
     };
-    const table = new cli_table_1.default(table_options);
-    let dep = data.react_app_dependency.length > 3
-        ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
-        : data.react_app_dependency;
-    table.push([data.react_app_name, process.cwd() + "\\" + data.react_app_name, dep, data.react_app_template]);
+    const table = new cli_table_1.default();
+    table.push({ "Nama App": data.react_app_name }, { Directory: process.cwd() + "\\" + data.react_app_name }, { "Installed dependecy": dep }, { Template: data.react_app_template });
     console.log(table.toString());
 }

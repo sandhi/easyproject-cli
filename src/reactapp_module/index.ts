@@ -66,7 +66,7 @@ export function create_reactapp() {
             if (res.react_app_dependency) {
                 console.log("==================================================");
 
-                console.log(chalk.blueBright("menginstall dependecy : ", res.react_app_dependency.join(" ")));
+                console.log(chalk.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
                 await do_install_dep(res);
             }
 
@@ -139,6 +139,11 @@ async function do_finish_message(data: IPromptValue) {
         )
     );
 
+    let dep =
+        data.react_app_dependency.length > 3
+            ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
+            : data.react_app_dependency;
+
     const table_options = {
         head: [
             chalk.blueBright("Nama App"),
@@ -148,13 +153,14 @@ async function do_finish_message(data: IPromptValue) {
         ],
     };
 
-    const table = new Table(table_options);
+    const table = new Table();
 
-    let dep =
-        data.react_app_dependency.length > 3
-            ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
-            : data.react_app_dependency;
-    table.push([data.react_app_name, process.cwd() + "\\" + data.react_app_name, dep, data.react_app_template]);
+    table.push(
+        { "Nama App": data.react_app_name },
+        { Directory: process.cwd() + "\\" + data.react_app_name },
+        { "Installed dependency": dep },
+        { Template: data.react_app_template }
+    );
 
     console.log(table.toString());
 }
