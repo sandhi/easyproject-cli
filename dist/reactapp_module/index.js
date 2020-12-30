@@ -6,12 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.create_reactapp = void 0;
 const inquirer_1 = __importDefault(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
-const child_process_1 = require("child_process");
+const execa_1 = __importDefault(require("execa"));
+const Listr = require("listr");
 const prompt_name = {
     react_app_name: "react_app_name",
+    react_app_template: "react_app_template",
     react_app_dependency: "react_app_dependency",
 };
-const list_dependency = ["react-router-dom", "bootstrap@4.5.3", "axios"];
+const list_dependency = ["react-router-dom", "bootstrap@4.5.3", "axios", "node-sass"];
+const list_template = ["typescript"];
 function create_reactapp() {
     inquirer_1.default
         .prompt([
@@ -39,13 +42,19 @@ function create_reactapp() {
             message: "pilih library yang akan di install?",
             choices: list_dependency,
         },
+        {
+            type: "list",
+            name: prompt_name.react_app_template,
+            message: "template apa yang anda inginkan (enter untuk tidak menggunakan)",
+            choices: list_template,
+        },
     ])
         .then(async (res) => {
-        if (res.react_app_name) {
-            console.log("==================================================");
-            console.log(chalk_1.default.blue("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
-            await do_create_react_app(res.react_app_name);
-        }
+        // if (res.react_app_name) {
+        //     console.log("==================================================");
+        //     console.log(chalk.blue("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
+        //     await do_create_react_app(res);
+        // }
         if (res.react_app_dependency) {
             console.log("==================================================");
             console.log(chalk_1.default.blue("menginstall dependecy : ", res.react_app_dependency.join(" ")));
@@ -54,37 +63,39 @@ function create_reactapp() {
     });
 }
 exports.create_reactapp = create_reactapp;
-function do_create_react_app(name) {
-    return new Promise((resolve) => {
-        const create_app = child_process_1.spawn("npx", ["create-react-app", name], {
-            cwd: process.cwd(),
-            detached: true,
-            stdio: "inherit",
-        });
-        create_app.on("exit", () => {
-            resolve(true);
-        });
-    });
+async function do_create_react_app(data) {
+    let arg_list = [];
+    arg_list.push("create-react-app");
+    arg_list.push(data.react_app_name);
+    if (data.react_app_template != undefined) {
+        arg_list.push("--template");
+        arg_list.push(data.react_app_template);
+    }
+    let tasks = new Listr([
+        {
+            title: "installing react app",
+            task: () => {
+                return execa_1.default("npx", arg_list);
+            },
+        },
+    ]);
+    await tasks.run();
 }
-function do_install_dep(data) {
-    let list_dep = [];
-    list_dep.push("install");
-    data.react_app_dependency.map((val) => {
-        list_dep.push(val);
+async function do_install_dep(data) {
+    let proc = [];
+    data.react_app_dependency.map((value) => {
+        proc.push({
+            title: "installing " + value,
+            task: (ctx, task) => {
+                return execa_1.default("npm", ["install", "--save", value], {
+                    cwd: process.cwd() + "/" + data.react_app_name,
+                }).catch((err) => {
+                    console.log(chalk_1.default.red(err));
+                    task.skip("failed install " + value);
+                });
+            },
+        });
     });
-    return new Promise((resolve) => {
-        if (data.react_app_dependency.length > 0) {
-            const install_dep = child_process_1.spawn("npm", list_dep, {
-                cwd: process.cwd() + "/" + data.react_app_name,
-                detached: true,
-                stdio: "inherit",
-            });
-            install_dep.on("exit", () => {
-                resolve(true);
-            });
-        }
-        else {
-            resolve(true);
-        }
-    });
+    let tasks = new Listr(proc);
+    await tasks.run();
 }
