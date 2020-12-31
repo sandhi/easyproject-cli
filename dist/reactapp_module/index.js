@@ -10,6 +10,7 @@ const execa_1 = __importDefault(require("execa"));
 const Listr = require("listr");
 const cli_table_1 = __importDefault(require("cli-table"));
 const rxjs_1 = require("rxjs");
+const ora_1 = __importDefault(require("ora"));
 const prompt_name = {
     react_app_name: "react_app_name",
     react_app_template: "react_app_template",
@@ -56,16 +57,19 @@ function create_reactapp() {
     ])
         .then(async (res) => {
         try {
-            if (res.react_app_name) {
-                console.log("==================================================");
-                console.log(chalk_1.default.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
-                await do_create_react_app(res);
-            }
-            if (res.react_app_dependency) {
-                console.log("==================================================");
-                console.log(chalk_1.default.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
-                await do_install_dep(res);
-            }
+            await do_validation();
+            // if (res.react_app_name) {
+            //     console.log("==================================================");
+            //     console.log(
+            //         chalk.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n")
+            //     );
+            //     await do_create_react_app(res);
+            // }
+            // if (res.react_app_dependency) {
+            //     console.log("==================================================");
+            //     console.log(chalk.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
+            //     await do_install_dep(res);
+            // }
             await do_finish_message(res);
         }
         catch (e) {
@@ -74,6 +78,28 @@ function create_reactapp() {
     });
 }
 exports.create_reactapp = create_reactapp;
+async function do_validation() {
+    // check untuk versi npm
+    let loading = ora_1.default("checking npm").start();
+    try {
+        const { stdout, stderr } = await execa_1.default("npm", ["-v"]);
+        if (stdout && stdout.indexOf(".") !== -1) {
+            let version = parseInt(stdout.slice(0, 1));
+            if (version < 6) {
+                throw "tolong update versi npm anda ke version 6 atau lebih";
+            }
+        }
+        if (stderr) {
+            console.log(chalk_1.default.red(stderr));
+            throw "npm belum terinstall";
+        }
+        loading.succeed("npm tersedia version " + stdout);
+    }
+    catch (e) {
+        loading.fail(e.toString());
+        return Promise.reject("gagal");
+    }
+}
 async function do_create_react_app(data) {
     let arg_list = [];
     arg_list.push("create-react-app");
@@ -139,14 +165,6 @@ async function do_finish_message(data) {
     let dep = data.react_app_dependency.length > 3
         ? data.react_app_dependency.slice(0, 3).join(" ,") + " dll."
         : data.react_app_dependency;
-    const table_options = {
-        head: [
-            chalk_1.default.blueBright("Nama App"),
-            chalk_1.default.blueBright("Directory"),
-            chalk_1.default.blueBright("Installed Dependency"),
-            chalk_1.default.blueBright("Template"),
-        ],
-    };
     const table = new cli_table_1.default();
     table.push({ "Nama App": data.react_app_name }, { Directory: process.cwd() + "\\" + data.react_app_name }, { "Installed dependency": dep }, { Template: data.react_app_template });
     console.log(table.toString());

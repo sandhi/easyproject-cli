@@ -4,6 +4,7 @@ import execa from "execa";
 const Listr = require("listr");
 import Table from "cli-table";
 import { Observable } from "rxjs";
+import ora from "ora";
 
 type dep = "react-router-dom" | "bootstrap@4.5.3" | "axios" | "node-sass";
 type template = "default" | "typescript";
@@ -59,6 +60,8 @@ export function create_reactapp() {
         ])
         .then(async (res: IPromptValue) => {
             try {
+                await do_validation();
+
                 if (res.react_app_name) {
                     console.log("==================================================");
                     console.log(
@@ -79,6 +82,32 @@ export function create_reactapp() {
                 console.log(chalk.red("Process gagal, silahkan coba lagi"));
             }
         });
+}
+
+async function do_validation() {
+    // check untuk versi npm
+    let loading = ora("checking npm").start();
+    try {
+        const { stdout, stderr } = await execa("npm", ["-v"]);
+
+        if (stdout && stdout.indexOf(".") !== -1) {
+            let version = parseInt(stdout.slice(0, 1));
+
+            if (version < 6) {
+                throw "tolong update versi npm anda ke version 6 atau lebih";
+            }
+        }
+
+        if (stderr) {
+            console.log(chalk.red(stderr));
+            throw "npm belum terinstall";
+        }
+
+        loading.succeed("npm tersedia version " + stdout);
+    } catch (e) {
+        loading.fail(e.toString());
+        return Promise.reject("gagal");
+    }
 }
 
 async function do_create_react_app(data: IPromptValue) {
