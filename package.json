@@ -1,5 +1,5 @@
 {
-  "name": "easyproject-cli",
+  "name": "@sandhi/easyproject-cli",
   "version": "1.0.0",
   "description": "create a project with easy",
   "main": "index.js",
