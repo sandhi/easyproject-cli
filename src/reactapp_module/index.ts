@@ -110,6 +110,10 @@ async function do_validation() {
     }
 }
 
+/**
+ * Create React App
+ * @param data
+ */
 async function do_create_react_app(data: IPromptValue) {
     let arg_list: any = [];
 
@@ -152,6 +156,10 @@ async function do_create_react_app(data: IPromptValue) {
     await tasks.run();
 }
 
+/**
+ * Install Dependencies
+ * @param data
+ */
 async function do_install_dep(data: IPromptValue) {
     let proc: any = [];
 
@@ -180,6 +188,10 @@ async function do_install_dep(data: IPromptValue) {
     await tasks.run();
 }
 
+/**
+ * Show message when process is completed
+ * @param data
+ */
 async function do_finish_message(data: IPromptValue) {
     console.log(
         chalk.greenBright("berhasil membuat app pada directory : " + process.cwd() + "\\" + data.react_app_name)

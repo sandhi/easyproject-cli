@@ -58,18 +58,16 @@ function create_reactapp() {
         .then(async (res) => {
         try {
             await do_validation();
-            // if (res.react_app_name) {
-            //     console.log("==================================================");
-            //     console.log(
-            //         chalk.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n")
-            //     );
-            //     await do_create_react_app(res);
-            // }
-            // if (res.react_app_dependency) {
-            //     console.log("==================================================");
-            //     console.log(chalk.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
-            //     await do_install_dep(res);
-            // }
+            if (res.react_app_name) {
+                console.log("==================================================");
+                console.log(chalk_1.default.blueBright("menginstall aplikasi react dengan nama " + res.react_app_name + "\n"));
+                await do_create_react_app(res);
+            }
+            if (res.react_app_dependency) {
+                console.log("==================================================");
+                console.log(chalk_1.default.blueBright("menginstall dependency : ", res.react_app_dependency.join(" ")));
+                await do_install_dep(res);
+            }
             await do_finish_message(res);
         }
         catch (e) {
